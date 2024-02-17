@@ -1,8 +1,6 @@
 package entities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Player {
 
@@ -49,7 +47,7 @@ public class Player {
         resources.put("wood", 0);
     }
 
-    private void addResource(String resource, int quantity) {
+    public void addResource(String resource, int quantity) {
         // Get the current quantity of the resource
         int oldValue = this.resources.getOrDefault(resource, 0);
 
@@ -109,7 +107,7 @@ public class Player {
 
     public boolean buildPrimarySettlement(int t_id, int v_id) {
 
-        Settlement s = new Settlement();
+        Settlement s = new Settlement(t_id, v_id);
 
         Tile clickedTile = Map.getTiles().getById(t_id);
 
@@ -145,24 +143,14 @@ public class Player {
         return true;
     }
 
-    public boolean drawCard(Card c) {
-        if (checkForEnoughResources(c.getCost())) {
-            spendResources(c.getCost());
-            this.cards.add(c);
-            return true;
-        } else {
-            System.out.println("you don't have enough resource for buying development card");
-            return false;
-        }
-    }
-
     public boolean buildSettlement(int t_id, int v_id) {
-        Settlement s = new Settlement();
+        Settlement s = new Settlement(t_id, v_id);
 
         // Check if the player has enough resources for the settlement
         if (checkForEnoughResources(s.getCost())) {
 
             Tile clickedTile = Map.getTiles().getById(t_id);
+
             if (!clickedTile.isVertexAvailable(v_id)) {
                 return false;
             }
@@ -195,6 +183,52 @@ public class Player {
         }
     }
 
+    public boolean buildRoad(int t_id, int e_id) {
+        Pair<Integer,Integer> roadLocation = new Pair<>(t_id,e_id);
+        Road r = new Road(this.id, t_id, e_id);
+        System.out.println("t_id: " + t_id);
+        System.out.println("e_id: " + e_id);
+
+        if (this.roads.size() <= 1) {
+            this.addResource("wood", 1);
+            this.addResource("brick", 1);
+        }
+        // Check if the player has enough resources for the road
+        if (checkForEnoughResources(r.getCost())) {
+
+            List<Pair<Integer, Integer>> possibilities = this.getAllRoadsPossibilities();
+            System.out.println(possibilities);
+
+            if (possibilities.contains(roadLocation)) {
+                // Deduct the cost from the player's resources
+                spendResources(r.getCost());
+
+                // Add the road to the player's list of roads
+                roads.add(r);
+
+                return true; // Building successful
+            } else {
+                System.out.println("Player Cant Build Road In This Location");
+                return false; // Not Valid Location
+            }
+
+        } else {
+            System.out.println("Player doesn't have enough resources to build road");
+            return false; // Not enough resources
+        }
+    }
+
+    public boolean drawCard(Card c) {
+        if (checkForEnoughResources(c.getCost())) {
+            spendResources(c.getCost());
+            this.cards.add(c);
+            return true;
+        } else {
+            System.out.println("you don't have enough resource for buying development card");
+            return false;
+        }
+    }
+
     //COMBINE THOSE TWO METHODS
     private boolean checkForEnoughResources(HashMap<String, Integer> cost) {
         // Check if the player has enough resources for the specified cost
@@ -214,6 +248,49 @@ public class Player {
         resources.compute("sheep", (key, value) -> value - cost.getOrDefault("sheep", 0));
     }
 
+
+    public void addPoints(int i) {
+        this.points += i;
+    }
+
+    public int removeAllResources(String r) {
+        // Retrieve the quantity of the specified resource
+        int quantity = this.resources.getOrDefault(r, 0);
+
+        // Set the value of the specified resource to zero
+        this.resources.put(r, 0);
+
+        // Return the original quantity
+        return quantity;
+    }
+
+    public List<Pair<Integer, Integer>> getAllRoadsPossibilities() {
+        Set<Pair<Integer, Integer>> uniquePossibilities = new HashSet<>();
+
+        List<Pair<Integer, Integer>> possibilitiesFromSettlements = new ArrayList<>();
+        List<Pair<Integer, Integer>> possibilitiesFromRoads = new ArrayList<>();
+
+        for (Settlement s : settlements) {
+            possibilitiesFromSettlements.addAll(s.getRoadsPossibilities());
+        }
+
+        for (Road road : roads) {
+            possibilitiesFromRoads.addAll(road.getRoadsPossibilities());
+        }
+
+        uniquePossibilities.addAll(possibilitiesFromRoads);
+        uniquePossibilities.addAll(possibilitiesFromSettlements);
+
+
+        List<Pair<Integer, Integer>> sortedPossibilities = new ArrayList<>(uniquePossibilities);
+
+        sortedPossibilities.sort(Comparator.comparing(Pair::getFirst));
+
+
+
+
+        return sortedPossibilities;
+    }
 
 
 }

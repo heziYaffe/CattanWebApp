@@ -21,7 +21,7 @@ public class GameManager {
     // Define constants for game states
 
     // Initialize game state
-    private int gameState = STATE_SELECTING_START_POSITIONS;
+    private static int gameState = STATE_SELECTING_START_POSITIONS;
     private int SelectingStartingPositionsStage = SELECTING_POSITIONS_FIRST_STAGE;
     private Map map;
     private DevelopmentCardPack developmentCardPack;
@@ -91,20 +91,31 @@ public class GameManager {
                 }
             case "buildRoad":
                 int e_id = Integer.parseInt(values.get("e_id"));
-                if (p.getRoads().isEmpty()
+                if (p.getSettlements().size() == 1
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_FIRST_STAGE) {
-                    //p.buildPrimaryRoad(t_id, e_id);
-                    return true;
-                } else if (p.getSettlements().size() == 1
+                    List<Pair<Integer,Integer>> roadPossibilities = p.getSettlements().get(0).getRoadsPossibilities();
+                    System.out.println("Roads Possibilities: " + roadPossibilities);
+                    if (roadPossibilities.contains(new Pair<>(t_id, e_id))) {
+                        return p.buildRoad(t_id, e_id);
+                    }
+                    return false;
+                } else if (p.getSettlements().size() == 2
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_SECOND_STAGE) {
-                    //p.buildPrimaryRoad(t_id, e_id);
-                    return true;
+                    List<Pair<Integer,Integer>> roadPossibilities = p.getSettlements().get(1).getRoadsPossibilities();
+                    System.out.println("Roads Possibilities: " + roadPossibilities);
+                    if (roadPossibilities.contains(new Pair<>(t_id, e_id))) {
+                        return p.buildRoad(t_id, e_id);
+                    }
+                    return false;
                 } else {
+                    System.out.println("Set Your Settlement First And Then Build Road");
                     return false;
                 }
+
             default:
                 return false;
         }
+
 
     }
 
@@ -178,17 +189,21 @@ public class GameManager {
 
     public boolean handleInputFromClients(String command, java.util.Map<String, String> values) {
         if (gameState == STATE_SELECTING_START_POSITIONS) {
+            System.out.println("Getting request from front end\n");
+            System.out.println("Command is " + command);
             return handleSelectingStartingPositions(command, values);
         } else if (gameState == STATE_GAME_RUNNING) {
             for (Player p : this.players) {
                 System.out.println(p);
             }
+
+            int t_id;
             Player p = players[turn % players.length];
             boolean returnValue = false;
             System.out.println("Command is " + command);
             switch (command) {
                 case "buildSettlement":
-                    int t_id = Integer.parseInt(values.get("t_id"));
+                    t_id = Integer.parseInt(values.get("t_id"));
                     int v_id = Integer.parseInt(values.get("v_id"));
                     returnValue = p.buildSettlement(t_id, v_id);
                     break;
@@ -211,8 +226,11 @@ public class GameManager {
                         //NOTIFY FRONT THAT THERE ARE NO MORE CARDS
                     }
                     break;
-
-
+                case "buildRoad":
+                    t_id = Integer.parseInt(values.get("t_id"));
+                    int e_id = Integer.parseInt(values.get("e_id"));
+                    returnValue = p.buildRoad(t_id, e_id);
+                    break;
                 default:
                     break;
 

@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class GameController {
 
-    private GameManager gm = new GameManager(4);
+    private GameManager gm = new GameManager(1);
 
 
     @CrossOrigin

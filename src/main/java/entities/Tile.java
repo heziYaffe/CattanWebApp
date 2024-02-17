@@ -73,7 +73,7 @@ public class Tile {
     }*/
 
 
-    public List<Pair<Integer,Integer>> getNeighborsToVertex(int vId) {
+    public List<Pair<Integer, Integer>> getNeighborsToVertex(int vId) {
         return this.h.getNeighborsToVertex(vId);
     }
 
@@ -88,6 +88,7 @@ public class Tile {
     public boolean isEdgeAvailable(int e_id) {
         return this.h.checkIfLocationIsValid("edge", e_id);
     }
+
     public void removeAvailableVertex(int v_id) {
         this.h.removeAvailableVertex(v_id); // remove the vertex from the list of available vertices
     }
@@ -108,7 +109,7 @@ public class Tile {
         this.h.removeVerticesAfterBuildingCity(v_id); // remove the vertex from the list of available vertices
     }
 
-        public String toString() {
+    public String toString() {
         return "Hexagon " + h.toString() +
                 ", Resource " + this.resource + ", number: " + this.number;
     }
@@ -124,4 +125,17 @@ public class Tile {
     public List<Integer> getNeighbors() {
         return this.neighbors;
     }
+
+    public void setThife(boolean b) {
+        this.thife = b;
+    }
+
+    public List<Pair<Integer, Integer>> getVertexCopies(int v_id) {
+        return this.h.getVertexCopies(v_id);
+    }
+
+    public List<Integer> getAdjacentEdgesToVertex(int v_id) {
+        return this.h.getAdjacentEdgesToVertex(v_id);
+    }
+
 }

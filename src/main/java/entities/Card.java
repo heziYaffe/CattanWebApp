@@ -19,7 +19,7 @@ public abstract class Card {
         this.owner = owner;
         this.name = name;
     }
-    public abstract void apply();
+    public abstract void apply(HashMap<String, String> data);
 
     public String getName() {
         return this.name;
@@ -28,4 +28,5 @@ public abstract class Card {
     public HashMap<String, Integer> getCost() {
         return cardCost;
     }
+
 }
