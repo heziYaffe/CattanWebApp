@@ -134,6 +134,10 @@ public class Tile {
         return this.h.getVertexCopies(v_id);
     }
 
+    public List<Pair<Integer, Integer>> getEdgeCopies(int e_id) {
+        return this.h.getEdgeCopies(e_id);
+    }
+
     public List<Integer> getAdjacentEdgesToVertex(int v_id) {
         return this.h.getAdjacentEdgesToVertex(v_id);
     }

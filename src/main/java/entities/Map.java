@@ -75,12 +75,14 @@ public class Map {
         }
     }
 
+
     private void initialTiles() {
 
         if (tiles.getAllValues().isEmpty()) {
             List<Integer> numbers = new ArrayList<>(List.of(2, 3, 3, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 10, 11, 11, 12));
             List<String> resources = new ArrayList<>(List.of("wood", "wood", "wood", "wood", "sheep", "sheep", "sheep", "sheep",
                     "wheat", "wheat", "wheat", "brick", "brick", "brick", "ore", "ore", "ore", "ore", "desert"));
+
 
             Collections.shuffle(numbers);
             Collections.shuffle(resources);
@@ -115,6 +117,8 @@ public class Map {
         }
 
     }
+
+
 
 
     public static TwoKeyHashMap<Integer, Pair<Integer, Integer>, Tile> getTiles() {

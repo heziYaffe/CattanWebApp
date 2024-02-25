@@ -1,6 +1,7 @@
 package entities;
 
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class Card {
     Player owner;
@@ -27,6 +28,16 @@ public abstract class Card {
 
     public HashMap<String, Integer> getCost() {
         return cardCost;
+    }
+
+    // Utility method to check if a list of cards contains a specific card name
+    public static boolean containsCardName(List<? extends Card> cards, String targetName) {
+        for (Card card : cards) {
+            if (card.getName().equals(targetName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

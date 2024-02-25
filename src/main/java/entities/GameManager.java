@@ -1,9 +1,6 @@
 package entities;
 
-import java.io.Console;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GameManager {
 
@@ -27,9 +24,45 @@ public class GameManager {
     private DevelopmentCardPack developmentCardPack;
     private Player[] players;
 
+    private Set<Settlement> settlements;
+
+    private List<Road> roads;
+
+    private int knightLocation;
+
     int turn = 0;
 
+    private static GameManager instance;
 
+    private GameManager() {
+        map = new Map();
+        developmentCardPack = new DevelopmentCardPack();
+        settlements = new HashSet<>();
+        roads = new ArrayList<>();
+        /*players = new Player[numPlayers];
+        setPLayersIdentifiers();
+        this.runGame();*/
+        // Private constructor to prevent instantiation
+    }
+
+    public String[] getPlayerColors() {
+        return playerColors;
+    }
+
+    public void setNumberOfPlayers(int numPlayers) {
+        this.players = new Player[numPlayers];
+        setPLayersIdentifiers();
+    }
+
+    public static GameManager getInstance() {
+        if (instance == null) {
+            instance = new GameManager();
+        }
+        return instance;
+    }
+
+
+    /*
     public GameManager(int numPlayers) {
         map = new Map();
         developmentCardPack = new DevelopmentCardPack();
@@ -41,6 +74,24 @@ public class GameManager {
 
     }
 
+     */
+
+
+    public Set<Settlement> getSettlements() {
+        return settlements;
+    }
+
+    public List<Road> getRoads() {
+        return roads;
+    }
+
+    public List<Pair<Integer,Integer>> getRoadsPositions() {
+        List<Pair<Integer,Integer>> roadsPositions = new ArrayList<>();
+        for (Road road : roads) {
+            roadsPositions.add(road.getRoadPosition());
+        }
+        return roadsPositions;
+    }
 
     // Method to set the game state
     public void setGameState(int state) {
@@ -73,19 +124,25 @@ public class GameManager {
 
     public boolean handleSelectingStartingPositions(String command, java.util.Map<String, String> values) {
 
+        if (!Objects.equals(command, "buildSettlement") && !Objects.equals(command, "buildRoad")) {
+            return false;
+        }
+
         Player p = players[turn];
         int t_id = Integer.parseInt(values.get("t_id"));
-
+        boolean returnValue = false;
         System.out.println("Command is " + command);
         switch (command) {
             case "buildSettlement":
                 int v_id = Integer.parseInt(values.get("v_id"));
                 if (p.getSettlements().isEmpty()
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_FIRST_STAGE) {
-                    return p.buildPrimarySettlement(t_id, v_id);
+                    returnValue = p.buildPrimarySettlement(t_id, v_id);
+                    return returnValue;
                 } else if (p.getSettlements().size() == 1
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_SECOND_STAGE) {
-                    return p.buildPrimarySettlement(t_id, v_id);
+                    returnValue = p.buildPrimarySettlement(t_id, v_id);
+                    return returnValue;
                 } else {
                     return false;
                 }
@@ -94,28 +151,28 @@ public class GameManager {
                 if (p.getSettlements().size() == 1
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_FIRST_STAGE) {
                     List<Pair<Integer,Integer>> roadPossibilities = p.getSettlements().get(0).getRoadsPossibilities();
-                    System.out.println("Roads Possibilities: " + roadPossibilities);
+                    //System.out.println("Roads Possibilities: " + roadPossibilities);
                     if (roadPossibilities.contains(new Pair<>(t_id, e_id))) {
-                        return p.buildRoad(t_id, e_id);
+                        returnValue = p.buildRoad(t_id, e_id);
+                        return returnValue;
                     }
                     return false;
                 } else if (p.getSettlements().size() == 2
                         && SelectingStartingPositionsStage == SELECTING_POSITIONS_SECOND_STAGE) {
                     List<Pair<Integer,Integer>> roadPossibilities = p.getSettlements().get(1).getRoadsPossibilities();
-                    System.out.println("Roads Possibilities: " + roadPossibilities);
+                    //System.out.println("Roads Possibilities: " + roadPossibilities);
                     if (roadPossibilities.contains(new Pair<>(t_id, e_id))) {
-                        return p.buildRoad(t_id, e_id);
+                        returnValue = p.buildRoad(t_id, e_id);
+                        return returnValue;
                     }
                     return false;
                 } else {
                     System.out.println("Set Your Settlement First And Then Build Road");
                     return false;
                 }
-
             default:
                 return false;
         }
-
 
     }
 
@@ -187,29 +244,51 @@ public class GameManager {
     }
 
 
-    public boolean handleInputFromClients(String command, java.util.Map<String, String> values) {
+    public java.util.Map<String, String> handleInputFromClients(String command, java.util.Map<String, String> values) {
+
+        java.util.Map<String, String> data = new HashMap<>();
+
+        Player p = players[turn % players.length];
+        boolean returnValue = false;
+
         if (gameState == STATE_SELECTING_START_POSITIONS) {
             System.out.println("Getting request from front end\n");
             System.out.println("Command is " + command);
-            return handleSelectingStartingPositions(command, values);
+            returnValue = handleSelectingStartingPositions(command, values);
+            if (returnValue) {
+                int s_id = p.getSettlements().get(p.getSettlements().size() - 1).getId();
+                System.out.println(s_id);
+                data.put("s_id", String.valueOf(s_id));
+            } else {
+                data.put("s_id", String.valueOf(-1));
+            }
+            data.put("returnValue", String.valueOf(returnValue));
         } else if (gameState == STATE_GAME_RUNNING) {
-            for (Player p : this.players) {
-                System.out.println(p);
+            for (Player player : this.players) {
+                System.out.println(player);
             }
 
             int t_id;
-            Player p = players[turn % players.length];
-            boolean returnValue = false;
+
             System.out.println("Command is " + command);
             switch (command) {
                 case "buildSettlement":
                     t_id = Integer.parseInt(values.get("t_id"));
                     int v_id = Integer.parseInt(values.get("v_id"));
                     returnValue = p.buildSettlement(t_id, v_id);
+                    if (returnValue) {
+                        int s_id = p.getSettlements().get(p.getSettlements().size() - 1).getId();
+                        System.out.println(s_id);
+                        data.put("s_id", String.valueOf(s_id));
+                    } else {
+                        data.put("s_id", String.valueOf(-1));
+                    }
                     break;
                 case "rollDice":
                     int d1 = Integer.parseInt(values.get("dice1"));
                     int d2 = Integer.parseInt(values.get("dice2"));
+                    System.out.println(d1);
+                    System.out.println(d2);
                     distributeResources(d1 + d2);
                     returnValue = true;
                     break;
@@ -231,14 +310,42 @@ public class GameManager {
                     int e_id = Integer.parseInt(values.get("e_id"));
                     returnValue = p.buildRoad(t_id, e_id);
                     break;
+
+                case "useThief":
+
+                    returnValue = p.useDevelopmentCard("knight");
+                    break;
+
+                case "setThief":
+
+                    int previousLocation = this.knightLocation;
+                    this.getTiles().getById(previousLocation).setThife(false);
+                    System.out.println(previousLocation);
+                    t_id = Integer.parseInt(values.get("t_id"));
+                    this.getTiles().getById(t_id).setThife(true);
+                    this.knightLocation = t_id;
+                    System.out.println(this.knightLocation);
+                    returnValue = true;
+                    break;
+                case "buildCity":
+                    // settlement id that is the base for the city
+                    int c_id = Integer.parseInt(values.get("s_id"));
+                    //returnValue = p.buildCity(c_id);
+                    returnValue = true;
+                    break;
                 default:
                     break;
 
 
             }
-            return returnValue;
+            data.put("returnValue", String.valueOf(returnValue));
+
+        } else {
+            returnValue = false;
+            data.put("returnValue", String.valueOf(returnValue));
         }
-        return false;
+        data.putAll(Helpers.getPlayerState(p));
+        return data;
     }
 
 
@@ -331,5 +438,17 @@ public class GameManager {
         }
         System.out.println("distribute Resources");
     }
-    // Add methods for handling turns, events, etc.
+
+    public void addRoad(Road r) {
+        this.roads.add(r);
+        Pair<Integer, Integer> roadPosition = r.getRoadPosition();
+        int t_id = roadPosition.getFirst();
+        int e_id = roadPosition.getSecond();
+        List<Pair<Integer,Integer>> edgeCopies = getTiles().getById(t_id).getEdgeCopies(e_id);
+
+        for (Pair<Integer, Integer> edgeCopy : edgeCopies) {
+            Road r1 = new Road(r.getOwnerId(), edgeCopy.getFirst(), edgeCopy.getSecond());
+            this.roads.add(r1);
+        }
+    }
 }

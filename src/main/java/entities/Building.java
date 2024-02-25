@@ -4,42 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Settlement extends Building {
-    static {
-        cost.put("wood", 1);
-        cost.put("brick", 1);
-        cost.put("wheat", 1);
-        cost.put("sheep", 1);
-    }
-    public Settlement(int t_id, int v_id) {
-        tiles = new ArrayList<>();
-        location = new Pair<>(t_id, v_id);
-        id = id + 1;
-    }
-}
+public abstract class Building {
 
-/*
-public class Settlement {
+    protected static int id = -1;
 
-    private static int id = -1;
+    protected int ownerId;
 
-    private Pair<Integer, Integer> location; //t_id, v_id
-    private List<Tile> tiles;
+    protected Pair<Integer, Integer> location; //t_id, v_id
+    protected List<Tile> tiles;
+    static HashMap<String, Integer> cost = new HashMap<>();
 
-    static HashMap<String, Integer> settlementCost = new HashMap<>();;
-
-    static {
-        settlementCost.put("wood", 1);
-        settlementCost.put("brick", 1);
-        settlementCost.put("wheat", 1);
-        settlementCost.put("sheep", 1);
-    }
-    public Settlement(int t_id, int v_id) {
-        tiles = new ArrayList<>();
-        location = new Pair<>(t_id, v_id);
-        id = id + 1;
-
-    }
     public List<Tile> getTiles() {
         return tiles;
     }
@@ -49,7 +23,7 @@ public class Settlement {
     }
 
     public HashMap<String, Integer> getCost() {
-        return settlementCost;
+        return cost;
     }
 
     public List<Pair<Integer, Integer>> getRoadsPossibilities() {
@@ -85,6 +59,12 @@ public class Settlement {
     public int getId() {
         return id;
     }
-}
 
- */
+    protected Pair<Integer, Integer> getLocation() {
+        return location;
+    }
+
+    protected int getOwnerId() {
+        return ownerId;
+    }
+}

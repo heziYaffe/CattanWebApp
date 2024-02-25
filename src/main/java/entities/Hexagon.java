@@ -42,6 +42,14 @@ public class Hexagon {
         return copies;
 
     }
+
+    public List<Pair<Integer, Integer>> getEdgeCopies(int e_id) {
+        List<Pair<Integer, Integer>> copies = this.getNeighborsToEdgeIds(e_id);
+        System.out.println("neighbors to edge " + e_id + ": " + copies);
+        return copies;
+
+    }
+
     public void removeVertexCopies(int v_id) {
         List<Pair<Integer, Integer>> copies = this.getVertexCopies(v_id);
         for (Pair<Integer, Integer> copy : copies) {

@@ -15,20 +15,32 @@ import java.util.Map;
 
 public class GameController {
 
-    private GameManager gm = new GameManager(1);
+    //private GameManager gm = new GameManager(1);
+    private GameManager gm;
 
+    public GameController() {
+        gm = GameManager.getInstance();
+        //gm.setNumberOfPlayers(numberOfPlayers);
+        gm.setNumberOfPlayers(2);
+
+    }
 
     @CrossOrigin
     @PostMapping("/endTurn")
     public ResponseEntity<java.util.Map<String, String>> endTurn() {
         // Perform end game logic here
-        System.out.println("Old Turn is " + this.gm.getTurn());
+
+        int oldTurn = this.gm.getTurn();
+        System.out.println("Old Turn is " + oldTurn);
         gm.endTurn();
-        System.out.println("New Turn is " + this.gm.getTurn());
+        int newTurn = this.gm.getTurn();
+        System.out.println("New Turn is " + newTurn);
         gm.notifyTurnChange();
         java.util.Map<String, String> response = new HashMap<>();
 
-        response.put("turn", String.valueOf(this.gm.getTurn()));
+        response.put("turn", String.valueOf(newTurn));
+        response.put("colorIndex", String.valueOf(newTurn % gm.getPlayers().length));
+
 
         return ResponseEntity.ok(response);
     }
@@ -41,14 +53,13 @@ public class GameController {
         String command = payload.get("command");
         payload.remove("command");
 
-        boolean b = gm.handleInputFromClients(command, payload);
+        java.util.Map<String, String> data = gm.handleInputFromClients(command, payload);
 
         // You can return a JSON response with a success message
         java.util.Map<String, String> response = new HashMap<>();
 
         response.put("message", "Notification received successfully");
-        response.put("returnValue", Boolean.toString(b));
-
+        response.putAll(data);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -56,27 +67,6 @@ public class GameController {
         return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 
-
-
-    /*
-    @CrossOrigin
-    @PostMapping("/rollDice")
-    public ResponseEntity<Map<String, String>> handleRollingDice(@RequestBody Map<String, Object> payload) {
-        // Access data from the payload directly
-        int dice1 = (int) payload.get("dice1");
-        int dice2 = (int) payload.get("dice2");
-        gm.distributeResources(dice1 + dice2);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Notification received successfully");
-        // Add logic for notify the front about every player new resources
-        // (after distribute)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
-    }
-     */
 
     @CrossOrigin
     @PostMapping("/card")

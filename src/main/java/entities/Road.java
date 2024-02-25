@@ -20,15 +20,28 @@ public class Road {
 
     static HashMap<String, Integer> roadCost = new HashMap<>();;
 
+    private static GameManager gm;
+
     static {
         roadCost.put("wood", 1);
         roadCost.put("brick", 1);
+        gm = GameManager.getInstance();
+
     }
+
+    /*
     public Road(int owner_id, Pair<Pair<Integer, Integer>,Pair<Integer, Integer>> vertecies) {
         this.id = ++counter;
         this.owner_id = owner_id;
         this.vertices = vertecies;
     }
+
+    public Road(int owner_id, int t_id, int startV_id, int endV_id) {
+        this.id = ++counter;
+        this.owner_id = owner_id;
+        this.t_id = t_id;
+    }
+    */
 
     public Road(int owner_id, int t_id, int e_id) {
         this.id = ++counter;
@@ -41,14 +54,13 @@ public class Road {
         //this.vertices = new Pair<>(new Pair<>(t_id, e_id), new Pair<>(t_id,));
     }
 
-    public Road(int owner_id, int t_id, int startV_id, int endV_id) {
-        this.id = ++counter;
-        this.owner_id = owner_id;
-        this.t_id = t_id;
+    public Pair<Integer,Integer> getRoadPosition() {
+        return this.edge;
     }
 
-
-
+    public int getOwnerId() {
+        return this.owner_id;
+    }
     public List<Pair<Integer, Integer>> getRoadsPossibilities() {
 
         List<Pair<Integer, Integer>> possibilities = new ArrayList<>();
